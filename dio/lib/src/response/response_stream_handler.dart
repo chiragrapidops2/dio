@@ -91,9 +91,17 @@ Stream<Uint8List> handleResponseStream(
   options.cancelToken?.whenCancel.whenComplete(() {
     stopWatchReceiveTimeout();
     // Close the response stream upon a cancellation.
-    response.close();
+    // response.close();
+    // responseSubscription.cancel();
+    // responseSink.addErrorAndClose(options.cancelToken!.cancelError!);
+
+    /// Close the response stream upon a cancellation.
     responseSubscription.cancel();
-    responseSink.addErrorAndClose(options.cancelToken!.cancelError!);
+    if (!responseSink.isClosed) {
+      response.close();
+      responseSink.addError(options.cancelToken!.cancelError!);
+      responseSink.close();
+    }
   });
   return responseSink.stream;
 }
